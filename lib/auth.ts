@@ -34,7 +34,8 @@ export async function verifySession(token: string): Promise<Session | null> {
 }
 
 export async function getSession(): Promise<Session | null> {
-  const token = cookies().get(COOKIE_NAME)?.value
+  const store = await cookies()
+  const token = store.get(COOKIE_NAME)?.value
   if (!token) return null
   return verifySession(token)
 }
@@ -46,7 +47,8 @@ export async function login(email: string, password: string): Promise<Session | 
   if (!ok) return null
   const session: Session = { userId: user.id, email: user.email }
   const token = await signSession(session)
-  cookies().set(COOKIE_NAME, token, {
+  const store = await cookies()
+  store.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -56,8 +58,9 @@ export async function login(email: string, password: string): Promise<Session | 
   return session
 }
 
-export function logout(): void {
-  cookies().delete(COOKIE_NAME)
+export async function logout(): Promise<void> {
+  const store = await cookies()
+  store.delete(COOKIE_NAME)
 }
 
 export const SESSION_COOKIE = COOKIE_NAME

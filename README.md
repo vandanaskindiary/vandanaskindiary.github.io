@@ -1,115 +1,115 @@
-# Vandana Skin Diary — Next.js 14
+# Vandana Skin Diary
 
-A clean, modern, mobile-friendly beauty blog optimised for affiliate marketing and Pinterest traffic.
+A Next.js 15 beauty blog with a built-in admin dashboard, Vercel Postgres database, and image uploads via Vercel Blob.
 
 ## Stack
-- **Next.js 14** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **Google Fonts** — Cormorant Garamond + DM Sans
+- **Next.js 15** (App Router, Server Components, ISR)
+- **TypeScript** (strict)
+- **Vercel Postgres** (Neon under the hood)
+- **Drizzle ORM**
+- **Vercel Blob** for image uploads
+- **JWT cookie auth** for the `/admin` dashboard
+- **Tailwind CSS v3**
+- **Tiptap** rich-text editor
 
-## Getting Started
+## Local development
 
 ```bash
-# 1. Install dependencies
 npm install
-
-# 2. Run dev server
-npm run dev
-# → open http://localhost:3000
-
-# 3. Build for production
-npm run build
-npm start
+cp .env.example .env.local        # fill values from your Vercel project
+npm run db:push                   # creates tables in your Postgres
+npm run db:seed                   # ports the existing static posts/products into DB
+npm run admin:set-password vandana@example.com 'a-strong-password'
+npm run dev                       # http://localhost:3000
 ```
 
-## Project Structure
-
-```
-├── app/
-│   ├── layout.tsx          ← Root layout (Navbar + Footer)
-│   ├── page.tsx            ← Home page
-│   ├── globals.css         ← Global styles + Tailwind
-│   ├── blog/
-│   │   ├── page.tsx        ← Blog listing (filterable + searchable)
-│   │   └── [slug]/
-│   │       └── page.tsx    ← Single post template
-│   ├── products/
-│   │   └── page.tsx        ← Affiliate shop (sortable + filterable)
-│   ├── about/page.tsx
-│   ├── contact/page.tsx
-│   └── privacy/page.tsx
-├── components/
-│   ├── Navbar.tsx
-│   ├── Footer.tsx
-│   ├── PostCard.tsx
-│   ├── ProductCard.tsx
-│   ├── NewsletterForm.tsx
-│   └── ShareButtons.tsx
-└── data/
-    ├── types.ts            ← TypeScript types
-    ├── posts.ts            ← All blog posts + body content
-    └── products.ts         ← All affiliate products
-```
-
-## Adding Affiliate Links
-
-Open `data/products.ts` and replace each `YOUR_AFFILIATE_LINK_HERE` with your actual affiliate URL:
-
-```ts
-{
-  id: 'p1',
-  name: 'Minimalist 10% Niacinamide Serum',
-  link: 'https://www.amazon.in/dp/XXXXXX?tag=yourtag-21', // ← your link here
-  where: 'Amazon',
-  ...
-}
-```
-
-## Adding New Posts
-
-Add a new object to the `POSTS` array in `data/posts.ts`:
-
-```ts
-{
-  id: 11,
-  slug: 'your-post-slug',        // used as URL: /blog/your-post-slug
-  category: 'Skincare',
-  title: 'Your Post Title',
-  excerpt: 'Short description...',
-  readTime: '5 min',
-  date: 'May 1, 2026',
-  featured: false,               // set true to show on homepage
-  color: '#e8d8e8',              // placeholder image bg color
-  tags: ['tag1', 'tag2'],
-  relatedProducts: ['p1', 'p3'], // product IDs to show in post
-  body: [
-    { heading: 'Section Heading', content: 'Section body text...' },
-    // add as many sections as you need
-  ],
-}
-```
-
-## Deploying to Vercel
-
-1. Push this folder to a GitHub repo
-2. Go to [vercel.com](https://vercel.com) → New Project
-3. Import your repo
-4. Click **Deploy** — done! 🚀
-
-No environment variables needed for the base setup.
-
-## Affiliate Platforms Supported
-- Amazon Associates
-- Flipkart Affiliate
-- Nykaa Affiliate
-- Myntra Affiliate
-
-## SEO
-- Every page has `<title>` and `<meta description>` via Next.js `generateMetadata`
-- Blog posts have OpenGraph tags for Pinterest/social sharing
-- Static generation (`generateStaticParams`) for all blog post pages
-- Clean URL structure: `/blog/post-slug`, `/products`, etc.
+The admin lives at `http://localhost:3000/admin`.
 
 ---
-Made with 💜 by Vandana Skin Diary
+
+## Deploying to Vercel — full step-by-step
+
+### 1. Push code to GitHub
+The repo is already wired to `git@github-personal:vandanaskindiary/vandanaskindiary.github.io.git`. After committing, run:
+```bash
+git push origin main
+```
+
+### 2. Create the Vercel project
+1. Go to **[vercel.com/new](https://vercel.com/new)** → import the `vandanaskindiary/vandanaskindiary.github.io` repo.
+2. Framework preset: **Next.js** (auto-detected).
+3. Don't click Deploy yet — first add the database.
+
+### 3. Provision Vercel Postgres (Neon)
+1. In the Vercel project → **Storage** tab → **Create Database** → pick **Neon Postgres** from the marketplace.
+2. Choose region **Washington D.C. (iad1)** (matches the build region; lowest latency).
+3. After creation, click **Connect** and link it to your project.
+   This auto-injects `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`, `POSTGRES_USER`, etc. into your env.
+
+### 4. Provision Vercel Blob (image storage)
+1. Same **Storage** tab → **Create Store** → **Blob**.
+2. Connect it to your project.
+   Auto-injects `BLOB_READ_WRITE_TOKEN`.
+
+### 5. Add the remaining env vars manually
+Project → **Settings → Environment Variables**, add for **Production, Preview, Development**:
+
+| Key | Value |
+|---|---|
+| `AUTH_SECRET` | run `openssl rand -base64 32` and paste the output |
+| `ADMIN_EMAIL` | the writer's email (used at login) |
+| `NEXT_PUBLIC_SITE_URL` | `https://vandanaskindiary.com` (or the Vercel URL until DNS is set) |
+
+`ADMIN_PASSWORD_HASH` is set by running the password script — see step 7.
+
+### 6. First deploy
+Click **Deploy**. The build will succeed but the DB is empty.
+
+### 7. Push schema, seed, set admin password
+Pull the env locally (one-time):
+```bash
+npm i -g vercel
+vercel link            # pick the project you just created
+vercel env pull .env.local
+```
+Then:
+```bash
+npm run db:push                                                   # creates tables
+npm run db:seed                                                   # ports static data
+npm run admin:set-password vandana@example.com 'her-password'     # creates admin user
+```
+
+### 8. Redeploy (or just open the live URL)
+Visit `https://<your-project>.vercel.app` — the blog renders from the DB.
+Admin login lives at `/admin/login`.
+
+### 9. Custom domain (optional)
+Project → **Settings → Domains** → add `vandanaskindiary.com`. Vercel walks you through the DNS records.
+
+---
+
+## How your sister uses the dashboard
+
+1. Open `https://vandanaskindiary.com/admin` → log in.
+2. **Posts → New Post** → write, paste images, link products, click **Publish**.
+3. **Products → New Product** → name, brand, price, affiliate link, image.
+4. Linked products auto-appear at the bottom of the post.
+
+(Coming in the next commit: this dashboard UI itself. The auth + DB layer is in place; UI is being built.)
+
+---
+
+## Useful commands
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build (run before pushing if unsure) |
+| `npm run db:push` | Push schema changes to DB |
+| `npm run db:generate` | Generate SQL migration files |
+| `npm run db:seed` | Seed DB from `data/posts.ts` and `data/products.ts` |
+| `npm run admin:set-password <email> <password>` | Create or reset an admin |
+
+## Affiliate disclosure
+Affiliate links go in the `link` field of each product (Amazon, Nykaa, Flipkart, Myntra, etc).
+The disclosure banner is already in place on `/products` and inside every blog post.

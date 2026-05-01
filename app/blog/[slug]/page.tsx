@@ -10,11 +10,12 @@ import type { Metadata } from 'next'
 export const revalidate = 60
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug)
+  const { slug } = await params
+  const post = await getPostBySlug(slug)
   if (!post) return {}
   const title = post.seoTitle || `${post.title} — Vandana Skin Diary`
   const description = post.seoDescription || post.excerpt
@@ -44,7 +45,8 @@ function formatDate(d: Date | null): string {
 }
 
 export default async function PostPage({ params }: Props) {
-  const post = await getPostBySlug(params.slug)
+  const { slug } = await params
+  const post = await getPostBySlug(slug)
   if (!post || !post.published) notFound()
 
   const relatedPosts = await getRelatedPosts(post.id, post.category)
