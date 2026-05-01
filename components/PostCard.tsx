@@ -1,9 +1,14 @@
 import Link from 'next/link'
-import type { Post } from '@/data/types'
+import type { Post } from '@/lib/db/schema'
 
 interface PostCardProps {
   post: Post
   wide?: boolean
+}
+
+function formatDate(d: Date | null): string {
+  if (!d) return ''
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export default function PostCard({ post, wide = false }: PostCardProps) {
@@ -15,7 +20,6 @@ export default function PostCard({ post, wide = false }: PostCardProps) {
       }`}
       style={{ boxShadow: '0 2px 12px rgba(120,79,119,0.07)' }}
     >
-      {/* Image placeholder */}
       <div
         className="relative overflow-hidden"
         style={{
@@ -24,25 +28,31 @@ export default function PostCard({ post, wide = false }: PostCardProps) {
           minHeight: wide ? '280px' : undefined,
         }}
       >
-        <svg width="100%" height="100%" className="absolute inset-0 opacity-10">
-          <defs>
-            <pattern id={`stripe-${post.id}`} x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
-              <line x1="0" y1="12" x2="12" y2="0" stroke="#5a3060" strokeWidth="1.2" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill={`url(#stripe-${post.id})`} />
-        </svg>
-        <span className="absolute inset-0 flex items-center justify-center font-mono text-xs opacity-50 text-center p-3"
-          style={{ color: '#5a3060' }}>
-          {post.category} — blog photo
-        </span>
+        {post.coverImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={post.coverImage} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <>
+            <svg width="100%" height="100%" className="absolute inset-0 opacity-10">
+              <defs>
+                <pattern id={`stripe-${post.id}`} x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">
+                  <line x1="0" y1="12" x2="12" y2="0" stroke="#5a3060" strokeWidth="1.2" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill={`url(#stripe-${post.id})`} />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center font-mono text-xs opacity-50 text-center p-3"
+              style={{ color: '#5a3060' }}>
+              {post.category} — blog photo
+            </span>
+          </>
+        )}
       </div>
 
-      {/* Content */}
       <div className={`flex flex-col justify-center ${wide ? 'p-8' : 'p-5'}`}>
         <div className="flex gap-2 items-center mb-2">
           <span className="text-xs font-bold tracking-wider uppercase text-plum">{post.category}</span>
-          <span className="text-xs text-muted">· {post.readTime} read · {post.date}</span>
+          <span className="text-xs text-muted">· {post.readTime} read · {formatDate(post.publishedAt)}</span>
         </div>
         <h3
           className={`font-serif font-bold text-ink leading-snug mb-2 group-hover:text-plum transition-colors ${

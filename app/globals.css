@@ -56,3 +56,63 @@ body {
 .marquee-inner:hover {
   animation-play-state: paused;
 }
+
+/* Rendered blog post HTML */
+.prose-vsd h2 {
+  font-family: var(--font-cormorant);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e1014;
+  margin: 2rem 0 0.75rem;
+  line-height: 1.25;
+}
+.prose-vsd h3 {
+  font-family: var(--font-cormorant);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e1014;
+  margin: 1.5rem 0 0.5rem;
+}
+.prose-vsd p {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: #4a2a3a;
+  margin-bottom: 1.25rem;
+}
+.prose-vsd a {
+  color: #784f77;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-vsd ul, .prose-vsd ol {
+  margin: 0 0 1.25rem 1.25rem;
+  color: #4a2a3a;
+  line-height: 1.85;
+}
+.prose-vsd ul { list-style: disc; }
+.prose-vsd ol { list-style: decimal; }
+.prose-vsd li { margin-bottom: 0.4rem; }
+.prose-vsd img {
+  border-radius: 1rem;
+  margin: 1.5rem 0;
+  width: 100%;
+  height: auto;
+}
+.prose-vsd blockquote {
+  border-left: 3px solid #784f77;
+  padding: 0.5rem 1rem;
+  margin: 1.5rem 0;
+  color: #6a4a5a;
+  font-style: italic;
+  background: #f9f5f2;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.prose-vsd strong { color: #1e1014; font-weight: 700; }
+.prose-vsd em { font-style: italic; }
+.prose-vsd code {
+  background: #784f7714;
+  color: #784f77;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.92em;
+}

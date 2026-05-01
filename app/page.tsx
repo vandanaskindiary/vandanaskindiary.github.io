@@ -1,9 +1,12 @@
 import Link from 'next/link'
-import { POSTS } from '@/data/posts'
-import { PRODUCTS } from '@/data/products'
+import { db } from '@/lib/db/client'
+import { posts, products } from '@/lib/db/schema'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 import PostCard from '@/components/PostCard'
 import ProductCard from '@/components/ProductCard'
 import NewsletterForm from '@/components/NewsletterForm'
+
+export const revalidate = 60
 
 const CATEGORIES = [
   { cat: 'Skincare',   emoji: '🧴', color: '#f0e8f5', desc: 'Routines & ingredients' },
@@ -20,11 +23,19 @@ const MARQUEE_ITEMS = [
   'Science-Backed Routines', 'Tested on Real Skin',
 ]
 
-export default function HomePage() {
-  const featured = POSTS.filter((p) => p.featured).slice(0, 4)
-  const editorPicks = PRODUCTS.filter((p) =>
-    ['Best Seller', "Editor's Pick", 'Top Rated', 'Fan Favourite'].includes(p.tag)
-  ).slice(0, 4)
+export default async function HomePage() {
+  const featured = await db
+    .select()
+    .from(posts)
+    .where(and(eq(posts.featured, true), eq(posts.published, true)))
+    .orderBy(desc(posts.publishedAt))
+    .limit(4)
+
+  const editorPicks = await db
+    .select()
+    .from(products)
+    .where(inArray(products.tagline, ['Best Seller', "Editor's Pick", 'Top Rated', 'Fan Favourite']))
+    .limit(4)
 
   return (
     <div>
@@ -144,7 +155,7 @@ export default function HomePage() {
           <Link href="/blog" className="text-sm font-semibold text-plum hover:underline">All posts →</Link>
         </div>
 
-        <PostCard post={featured[0]} wide />
+        {featured[0] && <PostCard post={featured[0]} wide />}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {featured.slice(1, 4).map((p) => (
