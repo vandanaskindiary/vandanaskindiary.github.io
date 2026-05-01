@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import '../lib/load-env'
 import { db } from '../lib/db/client'
 import { posts, products, postsProducts } from '../lib/db/schema'
 import { POSTS } from '../data/posts'
