@@ -18,7 +18,7 @@ async function isValid(token: string | undefined): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   if (!pathname.startsWith('/admin')) return NextResponse.next()
-  if (pathname === '/admin/login') return NextResponse.next()
+  if (pathname === '/admin/login' || pathname === '/admin/logout') return NextResponse.next()
 
   const token = req.cookies.get(COOKIE_NAME)?.value
   if (await isValid(token)) return NextResponse.next()

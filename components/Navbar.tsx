@@ -23,6 +23,8 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
+  if (pathname?.startsWith('/admin')) return null
+
   return (
     <>
       {/* Announcement bar */}
