@@ -33,7 +33,7 @@ export const POSTS: Post[] = [
       {
         heading: 'The Bottom Line',
         content:
-          'The best moisturizer is one you'll actually use every day. Start with a gel formula under ₹400, add SPF on top, and your skin will be transformed within 3–4 weeks. Consistency beats expensive ingredients every time.',
+          "The best moisturizer is one you'll actually use every day. Start with a gel formula under ₹400, add SPF on top, and your skin will be transformed within 3–4 weeks. Consistency beats expensive ingredients every time.",
       },
     ],
   },
