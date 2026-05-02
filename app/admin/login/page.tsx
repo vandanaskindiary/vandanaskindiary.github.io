@@ -1,24 +1,8 @@
 import { redirect } from 'next/navigation'
-import { login, getSession } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
+import LoginForm from './LoginForm'
 
 type SearchParams = Promise<{ next?: string; error?: string }>
-
-async function loginAction(formData: FormData) {
-  'use server'
-  const email = String(formData.get('email') ?? '').trim().toLowerCase()
-  const password = String(formData.get('password') ?? '')
-  const next = String(formData.get('next') ?? '/admin')
-
-  if (!email || !password) {
-    redirect(`/admin/login?error=missing&next=${encodeURIComponent(next)}`)
-  }
-
-  const session = await login(email, password)
-  if (!session) {
-    redirect(`/admin/login?error=invalid&next=${encodeURIComponent(next)}`)
-  }
-  redirect(next.startsWith('/admin') ? next : '/admin')
-}
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const session = await getSession()
@@ -74,66 +58,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           <p className="text-sm mb-6" style={{ color: '#c4b0c0' }}>
             Sign in to manage posts and products.
           </p>
-
-          {errorMsg && (
-            <div
-              className="rounded-xl px-4 py-3 mb-5 text-sm border"
-              style={{
-                background: 'rgba(220,80,100,0.12)',
-                borderColor: 'rgba(220,80,100,0.35)',
-                color: '#ffc8d0',
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
-
-          <form action={loginAction} className="flex flex-col gap-4">
-            <input type="hidden" name="next" value={next} />
-
-            <label className="block">
-              <span className="text-xs font-semibold tracking-wider uppercase block mb-2" style={{ color: '#c4a0b8' }}>
-                Email
-              </span>
-              <input
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                className="w-full rounded-xl px-4 py-3 text-cream text-sm outline-none border focus:border-pink-300 transition-colors"
-                style={{
-                  background: 'rgba(250,247,244,0.06)',
-                  borderColor: 'rgba(250,247,244,0.15)',
-                }}
-                placeholder="you@vandanaskindiary.com"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-xs font-semibold tracking-wider uppercase block mb-2" style={{ color: '#c4a0b8' }}>
-                Password
-              </span>
-              <input
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                className="w-full rounded-xl px-4 py-3 text-cream text-sm outline-none border focus:border-pink-300 transition-colors"
-                style={{
-                  background: 'rgba(250,247,244,0.06)',
-                  borderColor: 'rgba(250,247,244,0.15)',
-                }}
-                placeholder="••••••••"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="bg-plum text-white rounded-full py-3.5 text-sm font-semibold mt-2 hover:opacity-90 transition-opacity"
-            >
-              Sign in →
-            </button>
-          </form>
+          <LoginForm next={next} errorMsg={errorMsg} />
         </div>
 
         <p className="text-center text-xs mt-6" style={{ color: '#7a5a6a' }}>
